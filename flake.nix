@@ -16,27 +16,23 @@
     in
     {
       # Schemas tell Nix about the structure of your flake's outputs
-      schemas = flake-schemas.schemas;
+      inherit (flake-schemas) schemas;
 
-      packages = forEachSupportedSystem
-        (pkgs:
-          let audiomenu = pkgs.writers.writePython3Bin "audiomenu" { libraries = [ pkgs.python3Packages.click ]; } (builtins.readFile ./audiomenu.py); in
-          {
-            inherit audiomenu;
-            default = audiomenu;
-          });
+      formatter = forEachSupportedSystem (pkgs: pkgs.nixpkgs-fmt);
+
+      packages = forEachSupportedSystem (pkgs:
+        let
+          audiomenu = pkgs.writers.writePython3Bin "audiomenu" { libraries = [ pkgs.python3Packages.click ]; } (builtins.readFile ./audiomenu.py);
+        in
+        { inherit audiomenu; default = audiomenu; }
+      );
 
       # Development environments
-      devShells =
-        forEachSupportedSystem
-          (pkgs: {
-            default = pkgs.mkShell {
-              # Pinned packages available in the environment
-              packages = with pkgs; [
-                nixpkgs-fmt
-                (python3.withPackages (ps: [ ps.click ]))
-              ];
-            };
-          });
+      devShells = forEachSupportedSystem (pkgs: {
+        default = pkgs.mkShell {
+          # Pinned packages available in the environment
+          packages = [ (pkgs.python3.withPackages (ps: [ ps.click ])) ];
+        };
+      });
     };
 }
