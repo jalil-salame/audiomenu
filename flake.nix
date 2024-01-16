@@ -13,6 +13,8 @@
       # Helpers for producing system-specific outputs
       supportedSystems = [ "x86_64-linux" "aarch64-darwin" "x86_64-darwin" "aarch64-linux" ];
       forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f (import nixpkgs { inherit system; }));
+      # Package
+      package = pkgs: pkgs.writers.writePython3Bin "audiomenu" { libraries = [ pkgs.python3Packages.click ]; } (builtins.readFile ./audiomenu.py);
     in
     {
       # Schemas tell Nix about the structure of your flake's outputs
@@ -20,12 +22,9 @@
 
       formatter = forEachSupportedSystem (pkgs: pkgs.nixpkgs-fmt);
 
-      packages = forEachSupportedSystem (pkgs:
-        let
-          audiomenu = pkgs.writers.writePython3Bin "audiomenu" { libraries = [ pkgs.python3Packages.click ]; } (builtins.readFile ./audiomenu.py);
-        in
-        { inherit audiomenu; default = audiomenu; }
-      );
+      packages = forEachSupportedSystem (pkgs: let audiomenu = package pkgs; in { inherit audiomenu; default = audiomenu; });
+
+      overlays.default = final: prev: { audiomenu = package prev; };
 
       # Development environments
       devShells = forEachSupportedSystem (pkgs: {
