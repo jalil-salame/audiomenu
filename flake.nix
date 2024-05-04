@@ -4,22 +4,18 @@
   description = "A dmenu script to select audio devices";
 
   # Flake inputs
-  inputs.flake-schemas.url = "https://flakehub.com/f/DeterminateSystems/flake-schemas/*.tar.gz";
-  inputs.nixpkgs.url = "https://flakehub.com/f/NixOS/nixpkgs/0.1.*.tar.gz";
+  inputs.nixpkgs.url = "nixpkgs/nixos-unstable";
 
   # Flake outputs that other flakes can use
-  outputs = { self, flake-schemas, nixpkgs }:
+  outputs = { self, nixpkgs }:
     let
       # Helpers for producing system-specific outputs
       supportedSystems = [ "x86_64-linux" "aarch64-darwin" "x86_64-darwin" "aarch64-linux" ];
-      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f (import nixpkgs { inherit system; }));
+      forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f (nixpkgs.legacyPackages.${system}));
       # Package
       package = pkgs: pkgs.writers.writePython3Bin "audiomenu" { libraries = [ pkgs.python3Packages.click ]; } (builtins.readFile ./audiomenu.py);
     in
     {
-      # Schemas tell Nix about the structure of your flake's outputs
-      inherit (flake-schemas) schemas;
-
       formatter = forEachSupportedSystem (pkgs: pkgs.nixpkgs-fmt);
 
       packages = forEachSupportedSystem (pkgs: let audiomenu = package pkgs; in { inherit audiomenu; default = audiomenu; });
