@@ -7,7 +7,7 @@ A dmenu script to select the default audio source/sink in pipewire+wireplumber
 Map a key to `audiomenu select-source` and `audiomenu select-sink`
 
 You can set the dmenu program with `--menu 'fuzzel --dmenu'`. By default it
-will use the first available from `dmenu`, `dmenu-wl`, `rofi` and `fuzzel`.
+will use the first available from `dmenu`, `dmenu-wl`, `rofi`, `fuzzel` and `wofi`.
 
 ## Building
 

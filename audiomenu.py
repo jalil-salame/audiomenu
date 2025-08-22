@@ -93,7 +93,8 @@ def populate_volume(devices: list[AudioDevice]) -> None:
 
 
 def find_menuprog() -> str | None:
-    for prog in ["dmenu", "dmenu-wl", "rofi -dmenu", "fuzzel --dmenu"]:
+    for prog in ["dmenu", "dmenu-wl", "rofi -dmenu", "fuzzel --dmenu",
+                 "wofi --dmenu"]:
         if shutil.which(prog.split(" ")[0]) is not None:
             return prog
 
